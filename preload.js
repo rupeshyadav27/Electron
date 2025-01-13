@@ -1,5 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electron', {
-    openTerminal: () => ipcRenderer.invoke('open-terminal')
+    runScript: (data) => {
+        console.log('Preload: Calling runScript with:', data);
+        return ipcRenderer.invoke('run-script', data);
+    }
 });
