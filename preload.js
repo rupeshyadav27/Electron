@@ -1,5 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electron', {
-    openTerminal: () => ipcRenderer.invoke('open-terminal')
+    openTerminal: (data) => ipcRenderer.invoke('open-terminal', data)
 });

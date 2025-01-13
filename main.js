@@ -18,16 +18,15 @@ function createWindow() {
 
 app.whenReady().then(createWindow);
 
-ipcMain.handle('open-terminal', () => {
+ipcMain.handle('open-terminal', async (event, data) => {
     return new Promise((resolve, reject) => {
-        // For Windows
-        exec('start cmd.exe', (error, stdout, stderr) => {
+        exec(`cd "${data.path}" && ${data.script}`, (error, stdout, stderr) => {
             if (error) {
-                console.error('Error:', error);
+                console.error(`Error: ${error}`);
                 reject(error);
                 return;
             }
-            resolve('Terminal opened successfully');
+            resolve(stdout);
         });
     });
 });

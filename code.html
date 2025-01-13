@@ -132,23 +132,24 @@
             `;
 
             button.addEventListener('click', async () => {
-                if (machine.id === 1) {  // Only for Machine 1
-                    try {
-                        const statusIndicator = button.querySelector('.status-indicator');
-                        statusIndicator.classList.add('running');
-                        
-                        const result = await window.electron.openTerminal();
-                        console.log('Result:', result);
-                        
-                        // Reset status after 2 seconds
-                        setTimeout(() => {
-                            statusIndicator.classList.remove('running');
-                        }, 2000);
-                    } catch (error) {
-                        console.error('Error:', error);
-                        const statusIndicator = button.querySelector('.status-indicator');
+                try {
+                    const statusIndicator = button.querySelector('.status-indicator');
+                    statusIndicator.classList.add('running');
+                    
+                    const result = await window.electron.openTerminal({
+                        path: machine.path,
+                        script: machine.script
+                    });
+                    console.log('Result:', result);
+                    
+                    // Reset status after 2 seconds
+                    setTimeout(() => {
                         statusIndicator.classList.remove('running');
-                    }
+                    }, 2000);
+                } catch (error) {
+                    console.error('Error:', error);
+                    const statusIndicator = button.querySelector('.status-indicator');
+                    statusIndicator.classList.remove('running');
                 }
             });
 
