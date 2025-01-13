@@ -1,0 +1,128 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Electron Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+        }
+
+        #sidebar {
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #34495E 0%, #326a8f 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #logo-container {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #logo {
+            max-width: 150px;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+
+        #logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-button {
+            padding: 15px 20px;
+            margin: 8px 0;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-button:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+
+        .nav-button i {
+            font-size: 20px;
+            width: 24px;
+        }
+
+        .nav-button.active {
+            background: #21b89a;
+            box-shadow: 0 4px 15px rgba(37, 181, 153, 0.3);
+        }
+
+        #content {
+            flex: 1;
+            padding: 20px;
+            height: 100vh;
+            border: none;
+            background: white;
+        }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 80px;
+            }
+            .nav-button span {
+                display: none;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="sidebar">
+        <div id="logo-container">
+            <img id="logo" src="../loginpage/assets/images/indus_logo_dev.png" alt="Logo">
+        </div>
+        <button class="nav-button" onclick="navigateTo('code.html')">
+            <i class="fas fa-code"></i>
+            <span>Code</span>
+        </button>
+        <button class="nav-button" onclick="navigateTo('camera.html')">
+            <i class="fas fa-camera"></i>
+            <span>Camera Feed</span>
+        </button>
+        
+    </div>
+    <iframe id="content" src="code.html" frameborder="0"></iframe>
+
+    <script>
+        function navigateTo(page) {
+            document.getElementById('content').src = page;
+            // Remove active class from all buttons
+            document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            event.currentTarget.classList.add('active');
+        }
+
+        // Set initial active state
+        document.querySelector('.nav-button').classList.add('active');
+    </script>
+</body>
+</html>
