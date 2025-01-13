@@ -1,5 +1,5 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 const path = require('path');
 
 function createWindow() {
@@ -18,15 +18,29 @@ function createWindow() {
 
 app.whenReady().then(createWindow);
 
-ipcMain.handle('open-terminal', async (event, data) => {
+ipcMain.handle('run-script', async (event, data) => {
     return new Promise((resolve, reject) => {
-        exec(`cd "${data.path}" && ${data.script}`, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Error: ${error}`);
-                reject(error);
-                return;
+        const pythonProcess = spawn('python', ['main.py'], {
+            cwd: data.path,
+            shell: true
+        });
+
+        let output = '';
+
+        pythonProcess.stdout.on('data', (data) => {
+            output += data.toString();
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+            console.error(`Error: ${data}`);
+        });
+
+        pythonProcess.on('close', (code) => {
+            if (code === 0) {
+                resolve(output);
+            } else {
+                reject(`Process exited with code ${code}`);
             }
-            resolve(stdout);
         });
     });
 });

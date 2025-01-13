@@ -136,13 +136,12 @@
                     const statusIndicator = button.querySelector('.status-indicator');
                     statusIndicator.classList.add('running');
                     
-                    const result = await window.electron.openTerminal({
+                    const result = await window.electron.runScript({
                         path: machine.path,
                         script: machine.script
                     });
-                    console.log('Result:', result);
+                    console.log('Script output:', result);
                     
-                    // Reset status after 2 seconds
                     setTimeout(() => {
                         statusIndicator.classList.remove('running');
                     }, 2000);
