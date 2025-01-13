@@ -107,9 +107,10 @@
 
     <script>
         const machines = [
-            { id: 1, path: 'C:\\Users\\Rupesh\\python', script: 'python main.py' },
-            { id: 2, path: 'C:\\Users\\Rupesh\\python', script: 'python main.py' },
-            { id: 3, path: 'C:\\Users\\Rupesh\\python', script: 'python main.py' },
+            // Update paths to be more specific per machine
+            { id: 1, path: 'C:\\Users\\Rupesh\\python\\machine1', script: 'python main.py' },
+            { id: 2, path: 'C:\\Users\\Rupesh\\python\\machine2', script: 'python main.py' },
+            { id: 3, path: 'C:\\Users\\Rupesh\\python\\machine3', script: 'python main.py' },
             { id: 4, path: 'C:\\Users\\Rupesh\\python', script: 'python main.py' },
             { id: 5, path: 'C:\\Users\\Rupesh\\python', script: 'python main.py' },
             { id: 6, path: 'C:\\Users\\Rupesh\\python', script: 'python main.py' },
@@ -121,7 +122,13 @@
         const gridContainer = document.querySelector('.grid-container');
         const runningScripts = new Set();
 
+        // Add machine status tracking
+        const machineStatus = new Map();
+
         machines.forEach(machine => {
+            // Initialize machine status
+            machineStatus.set(machine.id, 'idle');
+            
             const button = document.createElement('button');
             button.className = 'machine-button';
             button.innerHTML = `
@@ -134,42 +141,40 @@
 
             button.addEventListener('click', async () => {
                 const statusIndicator = button.querySelector('.status-indicator');
-                
-                // Prevent multiple clicks while script is running
-                if (runningScripts.has(machine.id)) {
-                    alert('Script is already running for this machine');
+                const machineId = machine.id;
+
+                if (machineStatus.get(machineId) === 'running') {
+                    console.log(`Machine ${machineId} is already running`);
                     return;
                 }
 
                 try {
-                    console.log('Clicking machine button:', machine.id);
+                    machineStatus.set(machineId, 'running');
                     statusIndicator.classList.add('running');
-                    runningScripts.add(machine.id);
                     button.style.opacity = '0.7';
                     button.style.cursor = 'not-allowed';
-                    
-                    if (!window.electron) {
-                        throw new Error('Electron API not available');
-                    }
 
+                    console.log(`Starting script for machine ${machineId}`);
                     const result = await window.electron.runScript({
                         path: machine.path,
                         script: machine.script
                     });
-                    
-                    console.log('Script result:', result);
-                    alert(`Script completed successfully!\nOutput: ${result}`);
+
+                    console.log(`Machine ${machineId} completed:`, result);
+                    machineStatus.set(machineId, 'completed');
                 } catch (error) {
-                    console.error('Error running script:', error);
-                    alert(`Error running script: ${error.message || error}`);
+                    console.error(`Machine ${machineId} error:`, error);
+                    machineStatus.set(machineId, 'error');
                     statusIndicator.style.backgroundColor = '#e74c3c';
+                    alert(`Error running machine ${machineId}: ${error.message}`);
                 } finally {
                     setTimeout(() => {
-                        statusIndicator.classList.remove('running');
-                        statusIndicator.style.backgroundColor = '';
-                        button.style.opacity = '';
-                        button.style.cursor = '';
-                        runningScripts.delete(machine.id);
+                        if (machineStatus.get(machineId) !== 'running') {
+                            statusIndicator.classList.remove('running');
+                            button.style.opacity = '';
+                            button.style.cursor = '';
+                            machineStatus.set(machineId, 'idle');
+                        }
                     }, 2000);
                 }
             });
@@ -177,10 +182,14 @@
             gridContainer.appendChild(button);
         });
 
-        // Handle page unload
-        window.addEventListener('beforeunload', () => {
-            if (runningScripts.size > 0) {
-                return 'Scripts are still running. Are you sure you want to leave?';
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', (event) => {
+            const runningMachines = Array.from(machineStatus.entries())
+                .filter(([_, status]) => status === 'running');
+
+            if (runningMachines.length > 0) {
+                event.preventDefault();
+                event.returnValue = 'Scripts are still running. Are you sure you want to leave?';
             }
         });
     </script>
