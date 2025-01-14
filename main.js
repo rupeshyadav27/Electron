@@ -7,27 +7,33 @@ function createWindow() {
         width: 1200,
         height: 800,
         webPreferences: {
-            nodeIntegration: false,
+            preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
-            preload: path.join(__dirname, 'preload.js')
-        }
+            nodeIntegration: false,
+        },
     });
-
     win.loadFile('index.html');
 }
 
 app.whenReady().then(createWindow);
 
-ipcMain.handle('open-terminal', () => {
+// Handle Python script execution
+ipcMain.handle('run-python-script', async (event) => {
+    const pythonPath = 'C:/Users/Rupesh/AppData/Local/Programs/Python/Python313/python.exe';
+    const scriptPath = 'c:/Users/Rupesh/python/main.py';
+    
+    console.log(`Running script: ${scriptPath} with Python: ${pythonPath}`);
+    
     return new Promise((resolve, reject) => {
-        // For Windows
-        exec('start cmd.exe', (error, stdout, stderr) => {
+        const command = `"${pythonPath}" "${scriptPath}"`;
+        exec(command, (error, stdout, stderr) => {
             if (error) {
-                console.error('Error:', error);
-                reject(error);
+                console.error(`Execution failed: ${stderr || error.message}`);
+                reject(`Error: ${stderr || error.message}`);
                 return;
             }
-            resolve('Terminal opened successfully');
+            console.log(`Execution output: ${stdout}`);
+            resolve(stdout || 'Script executed successfully');
         });
     });
 });
